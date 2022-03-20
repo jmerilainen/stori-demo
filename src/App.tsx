@@ -48,7 +48,7 @@ function App() {
   const items = data?.map(getImage) ?? [];
 
   return (
-    <div className="flex items-center justify-center w-full min-h-screen py-20 bg-slate-50 dark:bg-slate-800">
+    <div className="flex items-center justify-center w-full min-h-screen py-20 bg-slate-50 dark:bg-slate-800 dark:text-white">
       <div className=" w-full max-w-[400px]  space-y-8">
         <div className="italic font-bold">
           Stori.
