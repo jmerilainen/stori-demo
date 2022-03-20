@@ -49,22 +49,27 @@ function App() {
 
   return (
     <div className="flex items-center justify-center w-full min-h-screen py-20 bg-slate-50 dark:bg-slate-800">
-      <div className="aspect-[9/16] bg-black text-white overflow-hidden rounded-lg w-full max-w-[400px] flex relative transform-cpu shadow-xl">
-        {isLoading
-          ? <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-6 h-6 animate-spin">
-                <IconLoading />
+      <div className=" w-full max-w-[400px]  space-y-8">
+        <div className="italic font-bold">
+          Stori.
+        </div>
+        <div className="aspect-[9/16] bg-black text-white overflow-hidden rounded-lg flex relative transform-cpu shadow-xl">
+          {isLoading
+            ? <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-6 h-6 animate-spin">
+                  <IconLoading />
+              </div>
             </div>
-          </div>
-          : <Stori onFinish={() => onFinish()}>
-            {items.map((item, index) => (
-                <div className="relative">
-                  <img key={item.id} src={item.url} className={`object-cover `} alt={item.alt} />
-                  <div className="absolute bottom-0 right-0 z-10 p-4 text-xs text-white drop-shadow ">@ {item.alt}</div>
-                </div>
-            ))}
-          </Stori>
-        }
+            : <Stori onFinish={() => onFinish()}>
+              {items.map((item, index) => (
+                  <div className="relative">
+                    <img key={item.id} src={item.url} className={`object-cover `} alt={item.alt} />
+                    <div className="absolute bottom-0 right-0 z-10 p-4 text-xs text-white drop-shadow ">@ {item.alt}</div>
+                  </div>
+              ))}
+            </Stori>
+          }
+        </div>
       </div>
     </div>
   );

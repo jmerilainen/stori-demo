@@ -1,9 +1,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+const queryClient = new QueryClient();
+const Wrapper = ({ children }: {children: React.ReactNode}) => (
+   <QueryClientProvider client={queryClient}>
+     {children}
+   </QueryClientProvider>
+);
+
+test('renders app', () => {
+  render(<Wrapper><App /></Wrapper>);
+  const titleElement = screen.getByText(/Stori/i);
+  expect(titleElement).toBeInTheDocument();
 });
