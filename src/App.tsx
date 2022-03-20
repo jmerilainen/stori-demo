@@ -1,5 +1,7 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from 'react-query';
 import Stori from './Components/Stori';
+import IconLoading from './Components/IconLoading';
 
 interface PicsumItem {
   id: string;
@@ -24,23 +26,45 @@ function getImage(data: PicsumItem): Pic {
   };
 }
 
+function randomNumber(min: number, max: number): number {
+  return Math.floor(Math.random() * max) + min;
+}
 
 function App() {
+  const [limit, setLimit] = useState(randomNumber(1,10));
+  const [page, setPage] = useState(randomNumber(1,100));
 
-  const [items, setItems] = useState<Pic[]>([
-    {"id":"100","author":"Tina Rataj","width":2500,"height":1656,"url":"https://unsplash.com/photos/pwaaqfoMibI","download_url":"https://picsum.photos/id/100/2500/1656"},
-    {"id":"1000","author":"Lukas Budimaier","width":5626,"height":3635,"url":"https://unsplash.com/photos/6cY-FvMlmkQ","download_url":"https://picsum.photos/id/1000/5626/3635"},
-    {"id":"1001","author":"Danielle MacInnes","width":5616,"height":3744,"url":"https://unsplash.com/photos/1DkWWN1dr-s","download_url":"https://picsum.photos/id/1001/5616/3744"}
-  ].map(getImage));
+  const { isLoading, error, data } = useQuery<PicsumItem[]>(['stories', limit, page], () =>
+    fetch(`https://picsum.photos/v2/list?page=${page}&limit=${limit}`).then((res) => res.json())
+  );
+
+  function onFinish() {
+    setLimit(randomNumber(1,10));
+    setPage(randomNumber(1,100));
+  }
+
+  if (error) return <div>An error has occurred</div>;
+
+  const items = data?.map(getImage) ?? [];
 
   return (
-    <div className="flex items-center justify-center w-full min-h-screen py-20">
-      <div className="aspect-[9/16] bg-black overflow-hidden rounded-lg w-full max-w-[400px] flex relative transform-cpu ">
-        <Stori>
-          {items.map((item, index) => (
-              <img key={item.id} src={item.url} className={`object-cover absolute inset-0`} alt={item.alt} />
-          ))}
-        </Stori>
+    <div className="flex items-center justify-center w-full min-h-screen py-20 bg-slate-50 dark:bg-slate-800">
+      <div className="aspect-[9/16] bg-black text-white overflow-hidden rounded-lg w-full max-w-[400px] flex relative transform-cpu shadow-xl">
+        {isLoading
+          ? <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-6 h-6 animate-spin">
+                <IconLoading />
+            </div>
+          </div>
+          : <Stori onFinish={() => onFinish()}>
+            {items.map((item, index) => (
+                <div className="relative">
+                  <img key={item.id} src={item.url} className={`object-cover `} alt={item.alt} />
+                  <div className="absolute bottom-0 right-0 z-10 p-4 text-xs text-white drop-shadow ">@ {item.alt}</div>
+                </div>
+            ))}
+          </Stori>
+        }
       </div>
     </div>
   );
