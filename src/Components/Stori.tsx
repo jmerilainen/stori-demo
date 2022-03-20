@@ -80,7 +80,7 @@ export default function Stori({
                 {items.map((item, index) => (
                     <div
                         key={index}
-                        className={`absolute inset-0 transition duration-1000 ${active == index ? 'opacity-100' : 'opacity-0'}`}
+                        className={`absolute inset-0 transition duration-1000 ${active === index ? 'opacity-100' : 'opacity-0'}`}
                         role="group"
                         aria-roledescription="slide"
                         aria-label={`${index + 1} of ${itemmsCount}`}
