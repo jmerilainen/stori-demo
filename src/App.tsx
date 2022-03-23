@@ -30,18 +30,30 @@ function randomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * max) + min;
 }
 
+function fetchPics(limit: number, page: number) {
+  return fetch(`https://picsum.photos/v2/list?page=${page}&limit=${limit}`).then((res) => res.json())
+}
+
+function usePics(limit: number, page: number) {
+  return useQuery<PicsumItem[]>(
+    ['stories', limit, page],
+    () => fetchPics(limit, page),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+}
+
 function App() {
   const [limit, setLimit] = useState(randomNumber(1,10));
   const [page, setPage] = useState(randomNumber(1,100));
 
-  const { isLoading, error, data } = useQuery<PicsumItem[]>(['stories', limit, page], () =>
-    fetch(`https://picsum.photos/v2/list?page=${page}&limit=${limit}`).then((res) => res.json())
-  );
-
-  function onFinish() {
+  const onFinish = () => {
     setLimit(randomNumber(1,10));
     setPage(randomNumber(1,100));
   }
+
+  const { isLoading, error, data } = usePics(limit, page);
 
   if (error) return <div>An error has occurred</div>;
 
@@ -49,7 +61,7 @@ function App() {
 
   return (
     <div className="flex items-center justify-center w-full min-h-screen py-20 bg-slate-50 dark:bg-slate-800 dark:text-white">
-      <div className=" w-full max-w-[400px]  space-y-8">
+      <div className=" w-full max-w-[400px]  space-y-8 px-4">
         <div className="italic font-bold">
           Stori.
         </div>
@@ -62,7 +74,7 @@ function App() {
             </div>
             : <Stori onFinish={() => onFinish()}>
               {items.map((item, index) => (
-                  <div className="relative">
+                  <div className="relative" key={index}>
                     <img key={item.id} src={item.url} className={`object-cover `} alt={item.alt} />
                     <div className="absolute bottom-0 right-0 z-10 p-4 text-xs text-white drop-shadow ">@ {item.alt}</div>
                   </div>
