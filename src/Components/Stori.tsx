@@ -124,7 +124,7 @@ export default function Stori({
             onFinish={() => onFinish()}
             speed={duration}
         >
-            <div className="relative w-full text-white" role="region" aria-roledescription="carousel">
+            <div className="relative w-full h-full text-white" role="region" aria-roledescription="carousel">
                 <div className="absolute z-20 flex w-full gap-2 p-4">
                     {children.map((item, index) => (
                         <TimeBar
@@ -148,11 +148,11 @@ export default function Stori({
                     </button>
                 </div>
 
-                <div className="relative w-full" aria-live="off" id="items">
+                <div className="relative w-full h-full" aria-live="off" id="items">
                     {children.map((item, index) => (
                         <div
                             key={index}
-                            className={`absolute inset-0 transition duration-1000 opacity-10 ${active === index ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute inset-0 transition duration-1000 opacity-10 flex ${active === index ? 'opacity-100' : 'opacity-0'}`}
                             role="group"
                             aria-roledescription="slide"
                             aria-label={`${index + 1} of ${children.length}`}
