@@ -94,7 +94,7 @@ function Timer({
         }
 
         setCurrentSlide(active);
-    }, [active]);
+    }, [active, itemsMax, onFinish]);
 
     useEffect(() => {
         if (autoPlay) setState('play');
