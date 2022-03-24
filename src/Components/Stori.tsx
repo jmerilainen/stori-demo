@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import useTimeout from '../hooks/useTimeout';
 
 // TODO: Refactor the file
+
 interface StoriProps {
     duration?: number;
     autoPlay?: boolean;
@@ -60,47 +61,56 @@ interface TimerProps {
     active: number;
     speed: number;
     autoPlay: boolean;
-    onChange: (n: number) => void;
     onFinish: () => void;
 }
 
-function Timer({
-    children,
+const useTimer = ({
     speed,
     active,
     slides,
     autoPlay,
-    onChange,
     onFinish,
-}: TimerProps) {
+}: TimerProps) => {
     const [currentSlide, setCurrentSlide] = useState(active);
-    const [state, setState] = useState<'idle' | 'play'>('idle');
+    const [state, setState] = useState<'idle' | 'play' | 'queue'>('idle');
 
     const itemmsCount = slides;
     const itemsMax = itemmsCount - 1;
 
-    const setPosition = (index: number) => onChange(index)
-
     useTimeout(() => {
-        setPosition(currentSlide + 1);
+        setState('idle');
+        if (autoPlay) {
+            setCurrentSlide(currentSlide + 1);
+        }
     }, state === 'play' ? speed : null)
 
     useEffect(() => {
-        setState('idle');
-
-        if (active > itemsMax || active < 0) {
+        if (currentSlide > itemsMax || currentSlide < 0) {
+            setState('idle');
             onFinish();
             return;
         }
-
-        setCurrentSlide(active);
-    }, [active, itemsMax, onFinish]);
+    }, [currentSlide, itemsMax, onFinish]);
 
     useEffect(() => {
-        if (autoPlay) setState('play');
-    }, [autoPlay, currentSlide]);
+        if (state === 'queue') setState('play');
+    }, [state]);
 
-    return <>{children}</>;
+    useEffect(() => {
+        if (autoPlay) setState('queue');
+    }, [autoPlay, currentSlide])
+
+    const changeSlide = (index: number) => {
+        setState('idle');
+        setCurrentSlide(index)
+    }
+
+    return {
+        currentSlide,
+        setSlide: (index: number) => changeSlide(index),
+        nextSlide: () => changeSlide(currentSlide + 1),
+        prevSlide: () => changeSlide(currentSlide - 1),
+    }
 }
 
 export default function Stori({
@@ -110,20 +120,18 @@ export default function Stori({
     onFinish = () => null,
     children
 }: StoriProps) {
-    const [active, setActive] = useState(start);
 
-    const setNextSlide = () => setActive(active + 1);
-    const setPreviousSlide = () => setActive(active - 1);
+    const { currentSlide, nextSlide, prevSlide, setSlide } = useTimer({
+        children: children,
+        slides: children.length,
+        autoPlay,
+        speed: duration,
+        active: start,
+        onFinish: () => onFinish()
+    });
 
     return (
-        <Timer
-            slides={children.length}
-            active={active}
-            autoPlay={autoPlay}
-            onChange={(index) => setActive(index)}
-            onFinish={() => onFinish()}
-            speed={duration}
-        >
+        <>
             <div className="relative w-full h-full text-white" role="region" aria-roledescription="carousel">
                 <div className="absolute z-20 flex w-full gap-2 p-4">
                     {children.map((item, index) => (
@@ -132,18 +140,18 @@ export default function Stori({
                             label={`Activte slide ${index + 1}`}
                             duration={duration}
                             slide={index}
-                            animate={index === active}
-                            fill={active > index}
-                            onClick={() => setActive(index)}
+                            animate={index === currentSlide}
+                            fill={currentSlide > index}
+                            onClick={() => setSlide(index)}
                         />
                     ))}
                 </div>
 
                 <div className="absolute inset-0 z-10 flex items-stretch">
-                    <button className="grow" aria-controls="items" onClick={() => setPreviousSlide()}>
+                    <button className="grow" aria-controls="items" onClick={() => prevSlide()}>
                         <div className="sr-only">Previous</div>
                     </button>
-                    <button className="grow" aria-controls="items" onClick={() => setNextSlide()}>
+                    <button className="grow" aria-controls="items" onClick={() => nextSlide()}>
                         <div className="sr-only">Next</div>
                     </button>
                 </div>
@@ -152,7 +160,7 @@ export default function Stori({
                     {children.map((item, index) => (
                         <div
                             key={index}
-                            className={`absolute inset-0 transition duration-1000 opacity-10 flex ${active === index ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute inset-0 transition duration-1000 opacity-10 flex ${currentSlide === index ? 'opacity-100' : 'opacity-0'}`}
                             role="group"
                             aria-roledescription="slide"
                             aria-label={`${index + 1} of ${children.length}`}
@@ -162,6 +170,6 @@ export default function Stori({
                     ))}
                 </div>
             </div>
-        </Timer>
+        </>
     )
 }
