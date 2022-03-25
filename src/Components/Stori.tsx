@@ -3,14 +3,6 @@ import useTimeout from '../hooks/useTimeout';
 
 // TODO: Refactor the file
 
-interface StoriProps {
-    duration?: number;
-    autoPlay?: boolean;
-    start?: number;
-    onFinish?: () => void;
-    children: React.ReactNode[];
-}
-
 interface TimeBarProps {
     fill?: boolean;
     animate?: boolean;
@@ -27,22 +19,26 @@ function TimeBar({
     label,
     onClick
 }: TimeBarProps) {
-    const [animated, setAnimated] = useState(false);
-
     const bar = useRef(null);
 
-    useEffect(() => {
-        if (bar.current) setAnimated(true);
+    const [state, setState] = useState<'idle' | 'play' | 'queue'>('idle');
 
-        return () => setAnimated(false);
+    useEffect(() => {
+        if (animate) setState('queue');
+
+        return () => setState('idle');
     }, [animate]);
+
+    useTimeout(() => {
+        setState('play');
+    }, state === 'queue' && bar.current ? 10 : null)
 
     return (
         <div className={`relative h-1 overflow-hidden rounded-full shadow-inner ${fill ? 'bg-white' : 'bg-white/30'} grow transform-cpu`}>
             {animate ?
                 <div
                     ref={bar}
-                    className={`bg-white inset-0 absolute transition-transform duration-[var(--duration)] ease-linear ${! animated ? '-translate-x-[101%]' : ''}`}
+                    className={`bg-white inset-0 absolute transition-transform duration-[var(--duration)] ease-linear ${state !== 'play' ? '-translate-x-[101%]' : ''}`}
                     style={{'--duration': `${duration}ms`} as React.CSSProperties}
                 ></div>
                 : ''
@@ -62,6 +58,14 @@ interface TimerProps {
     speed: number;
     autoPlay: boolean;
     onFinish: () => void;
+}
+
+interface StoriProps {
+    duration?: number;
+    autoPlay?: boolean;
+    start?: number;
+    onFinish?: () => void;
+    children: React.ReactNode[];
 }
 
 const useTimer = ({
@@ -160,7 +164,7 @@ export default function Stori({
                     {children.map((item, index) => (
                         <div
                             key={index}
-                            className={`absolute inset-0 transition duration-1000 opacity-10 flex ${currentSlide === index ? 'opacity-100' : 'opacity-0'}`}
+                            className={`absolute inset-0 transition duration-1000 opacity-10 flex ${currentSlide === index ? 'opacity-100' : 'opacity-0'} ${(currentSlide + 1) === index || currentSlide === index || (currentSlide - 1) === index ? '' : 'hidden'} `}
                             role="group"
                             aria-roledescription="slide"
                             aria-label={`${index + 1} of ${children.length}`}
