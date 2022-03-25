@@ -75,7 +75,7 @@ function App() {
             : <Stori onFinish={() => onFinish()}>
               {items.map((item, index) => (
                   <div className="relative w-full" key={index}>
-                    <img key={item.id} src={item.url} className={`object-cover w-full h-full`} alt={item.alt} />
+                    <img key={item.id} src={item.url} className={`object-cover w-full h-full`} alt={item.alt} loading="lazy" />
                     <div className="absolute bottom-0 right-0 z-10 p-4 text-xs text-white drop-shadow ">@ {item.alt}</div>
                   </div>
               ))}
