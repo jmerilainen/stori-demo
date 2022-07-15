@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useTimeout from '../hooks/useTimeout';
 
 // TODO: Refactor the file
@@ -73,38 +73,27 @@ const useTimer = ({
     onFinish,
 }: TimerProps) => {
     const [currentSlide, setCurrentSlide] = useState(active);
-    const [state, setState] = useState<'idle' | 'play' | 'queue'>('idle');
+    const [state, setState] = useState<'idle' | 'play'>(autoPlay ? 'play' : 'idle');
 
-    const itemmsCount = slides;
-    const itemsMax = itemmsCount - 1;
+    const maxIndex = slides - 1;
+
+    const changeSlide = (index: number) => {
+      setState('idle');
+
+      if (index > maxIndex || index < 0) {
+        onFinish();
+      } else {
+        setCurrentSlide(index)
+      }
+    }
 
     useTimeout(() => {
-        setState('idle');
-        if (autoPlay) {
-            setCurrentSlide(currentSlide + 1);
-        }
+      changeSlide(currentSlide + 1)
     }, state === 'play' ? speed : null)
 
     useEffect(() => {
-        if (currentSlide > itemsMax || currentSlide < 0) {
-            setState('idle');
-            onFinish();
-            return;
-        }
-    }, [currentSlide, itemsMax, onFinish]);
-
-    useEffect(() => {
-        if (state === 'queue') setState('play');
-    }, [state]);
-
-    useEffect(() => {
-        if (autoPlay) setState('queue');
-    }, [autoPlay, currentSlide])
-
-    const changeSlide = (index: number) => {
-        setState('idle');
-        setCurrentSlide(index)
-    }
+        if (autoPlay) setState('play');
+    }, [autoPlay, currentSlide]);
 
     return {
         currentSlide,
@@ -141,7 +130,7 @@ export default function Stori({
                             label={`Activte slide ${index + 1}`}
                             duration={duration}
                             slide={index}
-                            animate={index === currentSlide}
+                            animate={index === currentSlide && autoPlay}
                             fill={currentSlide > index}
                             onClick={() => setSlide(index)}
                         />
