@@ -12,6 +12,25 @@ interface TimeBarProps {
     onClick: () => void;
 }
 
+function TimeBarAnimate({
+  duration,
+}: {
+  duration: number
+}) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  return (
+    <div
+      className={`bg-white inset-0 absolute transition-transform duration-[var(--duration)] ease-linear ${! isMounted ? '-translate-x-[101%]' : ''}`}
+      style={{'--duration': `${duration}ms`} as React.CSSProperties}
+    ></div>
+  )
+}
+
 function TimeBar({
     fill = false,
     animate = false,
@@ -19,32 +38,10 @@ function TimeBar({
     label,
     onClick
 }: TimeBarProps) {
-    const bar = useRef(null);
-
-    const [state, setState] = useState<'idle' | 'play' | 'queue'>('idle');
-
-    useEffect(() => {
-        if (animate) setState('queue');
-
-        return () => setState('idle');
-    }, [animate]);
-
-    useTimeout(() => {
-        setState('play');
-    }, state === 'queue' && bar.current ? 10 : null)
-
     return (
         <div className={`relative h-1 overflow-hidden rounded-full shadow-inner ${fill ? 'bg-white' : 'bg-white/30'} grow transform-cpu`}>
-            {animate ?
-                <div
-                    ref={bar}
-                    className={`bg-white inset-0 absolute transition-transform duration-[var(--duration)] ease-linear ${state !== 'play' ? '-translate-x-[101%]' : ''}`}
-                    style={{'--duration': `${duration}ms`} as React.CSSProperties}
-                ></div>
-                : ''
-            }
-
-            <button className="absolute inset-0 transition hover:bg-white/50" aria-controls="items" onClick={() => void onClick()}>
+            {animate ? <TimeBarAnimate duration={duration} /> : '' }
+            <button className="absolute inset-0 transition duration-150 ease-linear hover:bg-white/50" aria-controls="items" onClick={() => void onClick()}>
                 <span className="sr-only">Activate slide {label + 1}</span>
             </button>
         </div>
